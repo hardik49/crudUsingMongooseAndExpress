@@ -9,6 +9,15 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
+app.get('/viewJob',async (req,res) => {
+    const job = await jobModel.find({});
+    try {
+        res.send(job);
+    } catch (err) {
+        res.send(500).send(err);
+    }
+});
+
 app.post('/addJob',async (req,res) => {
     const job = new jobModel(req.body);
     try {
