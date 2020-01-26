@@ -3,6 +3,16 @@ const jobModel = require('../model/models');
 const bodyParser = require('body-parser');
 const app = express();
 
+function message(statusCode, status, msg, data = '') {
+    let obj = {
+      statusCode: statusCode,
+      status: status,
+      message: msg,
+      data: data
+    }
+    return obj;
+}
+
 //Taken body parser since using post method and to pass its body this requires.
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -14,9 +24,9 @@ app.get('/viewJob',async (req,res) => {
     const job = await jobModel.find({});
     try {
         if (job.length != 0) {
-            res.send(job);
+            res.send(message(200, 'OK', 'Job added successfully', job));
         } else {
-            res.send('There are currently no job exists!');
+            res.send(message(400, 'Bad request', 'There are currently no job exists!'));
         }
     } catch (err) {
         res.send(500).send(err);
@@ -29,9 +39,9 @@ app.get('/searchJob/:title',async (req,res) => {
     const job = await jobModel.find({title:para});
     try {
         if (job.length != 0) {
-            res.send(job);
+            res.send(message(200, 'OK', 'Job found!', job));
         } else {
-            res.send('There is no such job exists!');
+            res.send(message(400, 'Bad request', `${para} is not exists!`));
         }
         
     } catch (err) {
@@ -45,9 +55,9 @@ app.get('/searchJob/city/:city',async (req,res) => {
     const job = await jobModel.find({city:para});
     try {
         if (job.length != 0) {
-            res.send(job);
+            res.send(message(200, 'OK', `Job found from ${para} city!`, job));
         } else {
-            res.send(`There are no such job exists from ${para} city`);
+            res.send(message(400, 'Bad request', `There are no such job exists from ${para} city`, job));
         }
     } catch (err) {
         res.send(500).send(err);
