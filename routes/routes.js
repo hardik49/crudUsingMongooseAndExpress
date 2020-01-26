@@ -9,6 +9,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
+//View all jobs
 app.get('/viewJob',async (req,res) => {
     const job = await jobModel.find({});
     try {
@@ -18,6 +19,18 @@ app.get('/viewJob',async (req,res) => {
     }
 });
 
+//City-wise search
+app.get('/searchJob/city/:city',async (req,res) => {
+    const para = req.params.city;
+    const job = await jobModel.find({city:para});
+    try {
+        res.send(job);
+    } catch (err) {
+        res.send(500).send(err);
+    }
+});
+
+//Add new job
 app.post('/addJob',async (req,res) => {
     const job = new jobModel(req.body);
     try {
