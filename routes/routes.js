@@ -19,6 +19,17 @@ app.get('/viewJob',async (req,res) => {
     }
 });
 
+//Search job
+app.get('/searchJob/:title',async (req,res) => {
+    const para = req.params.title;
+    const job = await jobModel.find({title:para});
+    try {
+        res.send(job);
+    } catch (err) {
+        res.send(500).send(err);
+    }
+});
+
 //City-wise search
 app.get('/searchJob/city/:city',async (req,res) => {
     const para = req.params.city;
