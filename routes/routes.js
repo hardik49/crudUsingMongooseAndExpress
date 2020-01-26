@@ -26,10 +26,10 @@ app.get('/viewJob',async (req,res) => {
         if (job.length != 0) {
             res.send(message(200, 'OK', 'Job added successfully', job));
         } else {
-            res.send(message(400, 'Bad request', 'There are currently no job exists!'));
+            res.send(message(400, 'bad request', 'There are currently no job exists!'));
         }
     } catch (err) {
-        res.send(500).send(err);
+        res.sendStatus(500).send(err);
     }
 });
 
@@ -41,11 +41,11 @@ app.get('/searchJob/:title',async (req,res) => {
         if (job.length != 0) {
             res.send(message(200, 'OK', 'Job found!', job));
         } else {
-            res.send(message(400, 'Bad request', `${para} is not exists!`));
+            res.send(message(400, 'bad request', `${para} is not exists!`));
         }
         
     } catch (err) {
-        res.send(500).send(err);
+        res.sendStatus(500).send(err);
     }
 });
 
@@ -57,10 +57,10 @@ app.get('/searchJob/city/:city',async (req,res) => {
         if (job.length != 0) {
             res.send(message(200, 'OK', `Job found from ${para} city!`, job));
         } else {
-            res.send(message(400, 'Bad request', `There are no such job exists from ${para} city`, job));
+            res.send(message(400, 'bad request', `There are no such job exists from ${para} city`));
         }
     } catch (err) {
-        res.send(500).send(err);
+        res.sendStatus(500).send(err);
     }
 });
 
@@ -71,7 +71,25 @@ app.post('/addJob',async (req,res) => {
         await job.save();
         res.send(job);
     } catch (err) {
-        res.send(500).send(err);
+        res.sendStatus(500).send(err);
+    }
+});
+
+//Delete job
+app.get('/delete/:title',async (req,res) => {
+    const para = req.params.title;
+    
+    const findJob = await jobModel.find({title:para});
+    
+    try {
+        if (findJob.length != 0) {
+            await jobModel.deleteOne({title:para});
+            res.send(message(200, 'OK', `${para} is deleted successfully!`, findJob));
+        } else {
+            res.send(message(400, 'bad request', `${para} is not found!`));
+        }
+    } catch (err) {
+        res.sendStatus(500).send(err);
     }
 });
 
