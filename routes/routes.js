@@ -13,7 +13,11 @@ app.use(bodyParser.urlencoded({
 app.get('/viewJob',async (req,res) => {
     const job = await jobModel.find({});
     try {
-        res.send(job);
+        if (job.length != 0) {
+            res.send(job);
+        } else {
+            res.send('There are currently no job exists!');
+        }
     } catch (err) {
         res.send(500).send(err);
     }
@@ -24,7 +28,12 @@ app.get('/searchJob/:title',async (req,res) => {
     const para = req.params.title;
     const job = await jobModel.find({title:para});
     try {
-        res.send(job);
+        if (job.length != 0) {
+            res.send(job);
+        } else {
+            res.send('There is no such job exists!');
+        }
+        
     } catch (err) {
         res.send(500).send(err);
     }
@@ -35,7 +44,11 @@ app.get('/searchJob/city/:city',async (req,res) => {
     const para = req.params.city;
     const job = await jobModel.find({city:para});
     try {
-        res.send(job);
+        if (job.length != 0) {
+            res.send(job);
+        } else {
+            res.send(`There are no such job exists from ${para} city`);
+        }
     } catch (err) {
         res.send(500).send(err);
     }
@@ -47,7 +60,6 @@ app.post('/addJob',async (req,res) => {
     try {
         await job.save();
         res.send(job);
-        console.log("Job record inserted");
     } catch (err) {
         res.send(500).send(err);
     }
