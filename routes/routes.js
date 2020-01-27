@@ -69,7 +69,7 @@ app.post('/addJob',async (req,res) => {
     const job = new jobModel(req.body);
     try {
         await job.save();
-        res.send(job);
+        res.send(message(200, 'OK', `Job successfully added!`, job));
     } catch (err) {
         res.sendStatus(500).send(err);
     }
@@ -78,7 +78,6 @@ app.post('/addJob',async (req,res) => {
 //Delete job
 app.get('/delete/:title',async (req,res) => {
     const para = req.params.title;
-    
     const findJob = await jobModel.find({title:para});
     
     try {
@@ -87,6 +86,20 @@ app.get('/delete/:title',async (req,res) => {
             res.send(message(200, 'OK', `${para} is deleted successfully!`, findJob));
         } else {
             res.send(message(400, 'bad request', `${para} is not found!`));
+        }
+    } catch (err) {
+        res.sendStatus(500).send(err);
+    }
+});
+
+//List all jojb city wise
+app.get('/viewJobCitywise',async (req,res) => {
+    const job = await jobModel.aggregate([{$group:{_id:"$city", "data": { "$push": "$$ROOT"  }}}]);
+    try {
+        if (job.length != 0) {
+            res.send(message(200, 'OK', 'Job Found!', job));
+        } else {
+            res.send(message(400, 'bad request', 'There are currently no job exists!'));
         }
     } catch (err) {
         res.sendStatus(500).send(err);
