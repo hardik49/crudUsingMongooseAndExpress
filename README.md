@@ -14,7 +14,7 @@ This will install all the required modules from saved dependency in <em>Pacakage
 |
 |
 |
-|   <h1> <marquee>Hardik Thakar</marquee> </h1>
+|   <h1>Hardik Thakar </h1>
 |
 |               
 |
