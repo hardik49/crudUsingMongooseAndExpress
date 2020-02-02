@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const url = require('url');
 const jobModel = require('../model/models');
 
 function message(statusCode, status, msg, data = '') {
@@ -21,8 +20,8 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-//View all jobs
-app.get('/manage-jobs', async (req, res) => {
+// View all jobs
+app.get('/jobs', async (req, res) => {
   try {
     const job = await jobModel.find({});
     if (job.length != 0) {
@@ -36,7 +35,7 @@ app.get('/manage-jobs', async (req, res) => {
 });
 
 // Search job
-app.get('/manage-jobs/:title', async (req, res) => {
+app.get('/jobs/:title', async (req, res) => {
   const para = req.params.title;
   try {
     const job = await jobModel.find({ title: para });
@@ -51,9 +50,8 @@ app.get('/manage-jobs/:title', async (req, res) => {
 });
 
 // City-wise search
-app.get('/manage-jobs/cities', async (req, res) => {
-  const para = req.query;
-  console.log(para);
+app.get('/job/from', async (req, res) => {
+  const para = req.query.city;
   try {
     const job = await jobModel.find({ city: para });
     if (job.length != 0) {
@@ -66,8 +64,8 @@ app.get('/manage-jobs/cities', async (req, res) => {
   }
 });
 
-//Add new job
-app.post('/manage-job/', async (req, res) => {
+// Add new job
+app.post('/job/', async (req, res) => {
   const job = new jobModel(req.body);
   try {
     await job.save();
@@ -78,7 +76,7 @@ app.post('/manage-job/', async (req, res) => {
 });
 
 // Delete job
-app.delete('manage-job/:title', async (req, res) => {
+app.delete('job/:title', async (req, res) => {
   const para = req.params.title;
   const findJob = await jobModel.find({ title: para });
   try {
@@ -93,10 +91,11 @@ app.delete('manage-job/:title', async (req, res) => {
   }
 });
 
-//List all jojb city wise
-app.get('/manage-jobs/cities', async (req, res) => {
+// List all jojb city wise
+app.get('/jobs/cities/all', async (req, res) => {
   try {
     const job = await jobModel.aggregate([{ $group: { _id: "$city", "data": { "$push": "$$ROOT" } } }]);
+    console.log(job);
     if (job.length != 0) {
       res.send(message(200, 'OK', 'Job Found!', job));
     } else {
