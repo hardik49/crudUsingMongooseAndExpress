@@ -1,7 +1,21 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
 
+const userModel = require('../model/userModels');
 const jobModel = require('../model/models');
+
+function verifyToken(req, res, next) {
+  const bodyHeader = req.headers['authorization'];
+  if(typeof bodyHeader != 'undefined') {
+    const requestBody = bodyHeader.split(' ');
+    const headerToken = requestBody[1];
+    req.token = headerToken;
+    next();
+  } else {
+    res.send('Token is invalid')
+  }
+}
 
 function message(statusCode, status, msg, data = '') {
   let obj = {
@@ -21,17 +35,24 @@ app.use(bodyParser.urlencoded({
 }));
 
 // View all jobs
-app.get('/jobs', async (req, res) => {
-  try {
-    const job = await jobModel.find({});
-    if (job.length != 0) {
-      res.send(message(200, 'OK', 'Job added successfully', job));
+app.get('/jobs', verifyToken ,async(req, res) => {
+  jwt.verify(req.token, 'secret', async (err, auth) => {
+    if(err) {
+      res.sendStatus(403);
     } else {
-      res.send(message(400, 'bad request', 'There are currently no job exists!'));
+      try {
+        const job = await jobModel.find({});
+        if (job.length != 0) {
+          res.send(message(200, 'OK', 'Job added successfully', job));
+        } else {
+          res.send(message(400, 'bad request', 'There are currently no job exists!'));
+        }
+      } catch (err) {
+        res.sendStatus(500).send(err);
+      }
     }
-  } catch (err) {
-    res.sendStatus(500).send(err);
-  }
+  });
+  
 });
 
 // Search job
@@ -101,6 +122,39 @@ app.get('/jobs/cities/all', async (req, res) => {
     } else {
       res.send(message(400, 'bad request', 'There are currently no job exists!'));
     }
+  } catch (err) {
+    res.sendStatus(500).send(err);
+  }
+});
+
+app.post('/login',async (req,res) => {
+  const em = req.body.email;
+  const pwd = req.body.password;
+  try {
+    const user = await userModel.find({$and:[{email: em}, {password: pwd}] });
+    let reqData = req.body;
+    if (user.length != 0) {
+      jwt.sign({reqData},'secret',(err, token) => {
+        res.json({
+          token
+        })
+      });
+    } else {
+      res.send(message(400, 'bad request', `There are no such user exists`));
+    }
+  } catch (err) {
+    res.sendStatus(500).send(err);
+  }
+  //let reqData = req.body;
+  
+});
+
+// Add new user
+app.post('/add-user', async (req, res) => {
+  const users = new userModel(req.body);
+  try {
+    await users.save();
+    res.send(message(200, 'OK', `User successfully added!`, users));
   } catch (err) {
     res.sendStatus(500).send(err);
   }
